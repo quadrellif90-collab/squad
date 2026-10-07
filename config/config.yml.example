@@ -1,0 +1,148 @@
+orchestrator:
+  agent: omp
+  # Which CLI agent runs Squad's own coordination logic
+  # Options: omp, qwen, mimo, aider
+
+autodetect:
+  enabled: true
+  scan_interval_seconds: 30
+  notify_on_change: true
+  silent_replacement: true
+
+agents:
+  # Available CLI agents. Can be extended with new agents at runtime via squad.config.set
+  omp:
+    cli: "C:\\Users\\quadr\\AppData\\Local\\omp\\omp.exe"
+    capabilities: [implementation, design, planning, devops, writing, review]
+    models_provider: freellmapi
+  qwen:
+    cli: "C:\\Users\\quadr\\AppData\\Local\\qwen-code\\bin\\qwen.cmd"
+    capabilities: [data_analysis, multilingual, research]
+    models_provider: freellmapi
+  mimo:
+    cli: "C:\\Users\\quadr\\.mimocode\\bin\\mimo.exe"
+    capabilities: [testing, verification, refactoring]
+    models_provider: freellmapi
+  aider:
+    cli: "C:\\Users\\quadr\\.local\\bin\\aider.exe"
+    capabilities: [code_editing, incremental_changes, git]
+    models_provider: freellmapi
+
+copilots:
+  # 11 disciplines = copilot roles
+  # Each copilot is mapped to a primary CLI agent with fallback chain
+  researcher:
+    primary: omp
+    fallback: [qwen, aider]
+    perspective: historical
+  architect:
+    primary: omp
+    fallback: [mimo]
+    perspective: scalability
+  engineer:
+    primary: omp
+    fallback: [aider, mimo]
+    perspective: robust
+  tester:
+    primary: mimo
+    fallback: [omp]
+    perspective: edge_cases
+  critic:
+    primary: omp
+    fallback: []
+    perspective: negative
+  devops:
+    primary: omp
+    fallback: [mimo]
+    perspective: cloud_native
+  writer:
+    primary: omp
+    fallback: [mimo]
+    perspective: conversational
+  analyst:
+    primary: qwen
+    fallback: [omp]
+    perspective: quantitative
+  marketer:
+    primary: omp
+    fallback: []
+    perspective: positioning
+  arbiter:
+    primary: mimo
+    fallback: [omp]
+    perspective: epistemic_vigilance
+  coordinator:
+    primary: omp
+    fallback: [mimo]
+    perspective: decompose
+
+chains:
+  feature:
+    pattern: sequential_pipeline
+    steps:
+      - discipline: coordinator
+      - discipline: researcher
+      - discipline: architect
+      - discipline: engineer
+      - discipline: tester
+      - discipline: critic
+      - discipline: devops
+  content:
+    pattern: sequential_pipeline
+    steps:
+      - discipline: coordinator
+      - discipline: researcher
+      - discipline: writer
+      - discipline: critic
+  analysis:
+    pattern: sequential_pipeline
+    steps:
+      - discipline: coordinator
+      - discipline: researcher
+      - discipline: analyst
+      - discipline: writer
+  launch:
+    pattern: sequential_pipeline
+    steps:
+      - discipline: coordinator
+      - discipline: researcher
+      - discipline: marketer
+      - discipline: analyst
+      - discipline: writer
+      - discipline: devops
+  fix:
+    pattern: sequential_pipeline
+    steps:
+      - discipline: coordinator
+      - discipline: researcher
+      - discipline: engineer
+      - discipline: critic
+  security_review:
+    pattern: debate
+    steps:
+      - discipline: coordinator
+      - discipline: researcher
+      - discipline: engineer
+      - discipline: critic
+      - discipline: arbiter
+
+mcp:
+  server_name: squad
+  tools:
+    - squad.dispatch
+    - squad.status
+    - squad.reload
+    - squad.config.get
+    - squad.config.set
+    - squad.agents.list
+    - squad.copilots.map
+
+safety:
+  mind_virus_warning: true
+  anti_conformity: true
+  epistemic_vigilance: true
+  territory_assignment: true
+
+logging:
+  level: INFO
+  file: ~/.agents/squad/workspace/squad.log

@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+~/.agents/
+config/config.yml
+workspace/
+memory/
